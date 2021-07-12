@@ -169,4 +169,136 @@ END;
 </copy>
 ```
 
+## **STEP 6:** Create a stored procedure *load_sales*.
 
+- This procedure loops through all the files in the daily_input_files bucket and for each file re-creates the external table and then loads (and logs) the data.  *Note you will substitute your URI in the file_uri_list line below, but remove the file name part at the end since we'll allow ANY table in the bucket to get loaded and will rebuild the external table based on the preceding query.*.  Note it does not matter what the file names are (the process will do all the files in the bucket) and afer processing it deletes them.
+```
+<copy>
+create or replace procedure load_sales as
+
+v_row_count number;
+
+begin
+
+---------------------------------------------------
+-- loop through files in saily_input_files bucket
+---------------------------------------------------
+
+for i in (SELECT object_name FROM DBMS_CLOUD.LIST_OBJECTS('API_TOKEN', '<object storage bucket URI>'))
+loop
+
+-- drop external table
+begin
+execute immediate 'drop table sales_ext';
+exception when others then null;
+end;
+
+-- re-create external table
+begin
+ DBMS_CLOUD.CREATE_EXTERNAL_TABLE(
+ table_name =>'new_sales_ext',
+ credential_name =>'api_token',
+ file_uri_list =>'<object storage bucket uri>'||i.object_name,
+ format => json_object('delimiter' value ',', 'removequotes' value 'true','ignoremissingcolumns' value 'true','blankasnull' value 'true','skipheaders' value '1'),
+ column_list => 'prod_id number, cust_id number, time_id date, channel_id number, promo_id number, quantity_sold number, amount_sold number');
+exception when others then null;
+end;
+
+select count(*) into v_row_count from sales_ext;
+
+---------------------------------------------------
+-- for each file load daily data
+---------------------------------------------------
+
+insert into sales select a.*, sysdate from sales_ext a;
+commit;
+
+-- delete existing external table
+begin
+DBMS_CLOUD.DELETE_OBJECT('API_TOKEN', '<object storage bucket uri>'||i.object_name);
+exception when others then null;
+end;
+
+insert into load_log values('Load', i.object_name, v_row_count, sysdate);
+commit;
+
+end loop; -- end i1 loop
+
+end load_sales;
+</copy>
+```
+
+## **STEP 7:** Create a stored procedure *update_sales*.
+
+- This procedure also loops through all the files in the daily_input_files bucket and for each file re-creates the external table and then *updates* (and logs) the data.  *Note you will substitute your URI in the file_uri_list line below, but remove the file name part at the end since we'll allow ANY table in the bucket to get loaded and will rebuild the external table based on the preceding query.*.  Note this code has used bulk load pl/sql processing to reduce pl/sql - to sql context switching, providing batch processing versus row by row processing.
+```
+<copy>
+create or replace procedure update_sales as
+
+v_row_count number;
+type sales_t is table of sales_ext%rowtype index by pls_integer;
+l_sales sales_t;
+
+begin
+
+---------------------------------------------------
+-- loop through files in saily_input_files bucket
+---------------------------------------------------
+
+for i in (SELECT object_name FROM DBMS_CLOUD.LIST_OBJECTS('API_TOKEN', '<object storage bucket uri>'))
+loop
+
+-- drop external table
+begin
+execute immediate 'drop table sales_ext';
+exception when others then null;
+end;
+
+-- re-create external table
+begin
+ DBMS_CLOUD.CREATE_EXTERNAL_TABLE(
+ table_name =>'sales_ext',
+ credential_name =>'api_token',
+ file_uri_list =>'<object storage bucket uri>'||i.object_name,
+ format => json_object('delimiter' value ',', 'removequotes' value 'true','ignoremissingcolumns' value 'true','blankasnull' value 'true','skipheaders' value '1'),
+ column_list => 'prod_id number, cust_id number, time_id date, channel_id number, promo_id number, quantity_sold number, amount_sold number');
+exception when others then null;
+end;
+
+select count(*) into v_row_count from sales_ext;
+
+---------------------------------------------------
+-- for each file update daily data
+---------------------------------------------------
+
+select * bulk collect into l_sales from sales_ext;
+
+forall i2 in 1 .. l_sales.last
+
+update sales
+set quantity_sold = l_sales(i2).quantity_sold
+    , amount_sold = l_sales(i2).amount_sold
+    , last_update_date = sysdate
+where prod_id = l_sales(i2).prod_id
+and cust_id = l_sales(i2).cust_id
+and time_id = l_sales(i2).time_id
+and channel_id = l_sales(i2).channel_id
+and promo_id = l_sales(i2).promo_id;
+commit;
+
+-- delete existing external table
+begin
+DBMS_CLOUD.DELETE_OBJECT('API_TOKEN', '<object storage bucket uri>'||i.object_name);
+exception when others then null;
+end;
+
+insert into load_log values('Update', i.object_name, v_row_count, sysdate);
+commit;
+
+end loop; -- end i1 loop
+
+end update_sales;
+</copy>
+```
+
+## **STEP 8:** Create a scheduled job that will periodcally check
