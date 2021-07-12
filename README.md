@@ -14,8 +14,6 @@ There are various ways to do this, and the availability of cloud services such a
 
 This documents an alternative approach that only requires the use of SQL (which is needed in any case) and no other platform.  It is scalable and can process millions of records in seconds even using a minimal 1-ocpu ADB shape, and also offers the full power of the SQL language to handle the processing of object storage files as though they were native database files.  To illustrate we'll use data from the sh schema that is available in every Oracle Database so others can replicate these steps in their own environment.  We'll copy the *sales* table from the *sh* schema to a new *demo* schema so we can update it, but will leave the other sh tables as is and will be querying them.
 
-
-
 ## **STEP 1:** Create an Auth Token so ADB Can read files in Object Storage:
 
 - Navigate to your users
