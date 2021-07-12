@@ -94,7 +94,7 @@ END;
 </copy>
 ```
 
-- Click on the new_sales_ext table and view data to confirm the table was created properly.  *Note: the file in object storage does NOT need to exist to create the external table.  It just needs to exist when you query the table.*
+- Click on the *new_sales_ext* table and view data to confirm the table was created properly.  *Note: the file in object storage does NOT need to exist to create the external table.  It just needs to exist when you query the table.*
 
   ![](images/010.png " ")
 
