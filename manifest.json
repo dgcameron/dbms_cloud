@@ -1,44 +1,12 @@
 {
     "tutorials": [
         {         
-            "title": "Introduction to Python Development with Autonomous Transaction Processing",
+            "title": "Case Study in the Use of DBMS_CLOUD (and Other Core Database Features) to Automate Loading Data into Autonomous Database (ADB)",
             "description": "",
             "partnumber": "Ennnnn_01",
-            "publisheddate": "4/10/2020",
+            "publisheddate": "7/12/2021",
             "contentid": "12nnnn",
             "filename": "README.md"
-        },
-        {         
-            "title": "Lab 1: Setup Cloud Environment",
-            "description": "",
-            "partnumber": "Ennnnn_01",
-            "publisheddate": "4/10/2020",
-            "contentid": "12nnnn",
-            "filename": "1.md"
-        },
-        {         
-            "title": "Lab 2: Build and test python REST Service",
-            "description": "",
-            "partnumber": "Ennnnn_01",
-            "publisheddate": "4/10/2020",
-            "contentid": "12nnnn",
-            "filename": "2.md"
-        },
-        {         
-            "title": "Lab 3: Plot data and show nearest service provider on map",
-            "description": "",
-            "partnumber": "Ennnnn_01",
-            "publisheddate": "4/10/2020",
-            "contentid": "12nnnn",
-            "filename": "3.md"
-        },
-        {         
-            "title": "Lab 4: Show customers based on regions",
-            "description": "",
-            "partnumber": "Ennnnn_01",
-            "publisheddate": "4/10/2020",
-            "contentid": "12nnnn",
-            "filename": "4.md"
         }
 
     ]
