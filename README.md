@@ -302,3 +302,32 @@ end update_sales;
 ```
 
 ## **STEP 8:** Create a scheduled job that will periodcally check
+
+- Create a schedule.  *Note this sample code sets up a job that will execute every five minutes.  This is only to test.  You need to change this to suit your desired schedule.*  This is just a sample.  You would need a separate one (or combine in a package) for the update job.
+```
+<copy>
+BEGIN
+    DBMS_SCHEDULER.CREATE_JOB (
+            job_name => 'LOAD_SALES_JOB',
+            job_type => 'STORED_PROCEDURE',
+            job_action => 'DEMO.LOAD_SALES',
+            number_of_arguments => 0,
+            start_date => '24-JUN-21 03.00.00 AM America/New_York',
+	    repeat_interval => 'FREQ=MINUTELY;INTERVAL=5;',
+            end_date => NULL,
+            enabled => TRUE,
+            auto_drop => FALSE,
+            comments => '');
+
+    DBMS_SCHEDULER.SET_ATTRIBUTE( 
+             name => 'LOAD_SALES_JOB', 
+             attribute => 'logging_level', value => DBMS_SCHEDULER.LOGGING_OFF);
+
+-- enable
+DBMS_SCHEDULER.enable(
+             name => 'LOAD_SALES_JOB');
+END;
+</copy>
+```
+
+- Note [the following](https://stackoverflow.com/questions/26602572/oracle-dbms-scheduler-repeat-interval) can be used to confirm the proper setup of your schedule.
