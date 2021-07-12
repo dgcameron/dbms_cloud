@@ -14,8 +14,22 @@ There are various ways to do this, and the availability of cloud services such a
 
 This documents an alternative approach that only requires the use of SQL (which is needed in any case) and no other platform.  It is scalable and can process millions of records in seconds even using a minimal 1-ocpu ADB shape, and also offers the full power of the SQL language to handle the processing of object storage files as though they were native database files.  To illustrate we'll use data from the sh schema that is available in every Oracle Database so others can replicate these steps in their own environment.
 
-### **Options in Recommended Order (Depends Partly on Use Case):**
+## **STEP 1:** Your Oracle Cloud Trial Account
 
-- [**Oracle Data Integrator (ODI) with BI Cloud Connector (BICC)**](odi.md) (recommended):
-    - No data volume limits.
-    - Oracle Data Integrator (ODI).  ODI can manage the BICC source and DBCS/ADW targets, and orchestrate the movement of data from BICC to Object Storage and from there to your target.  This is the recommended tool.
+### **Cloud Setup:**
+
+- Create a new schema that will own objects (userid demo in this case):
+```
+<copy>
+create user demo identfied by <password>;
+grant dwrole, oml_developer, create table, create view to credit;
+grant read, write on directory data_pump_dir to credit;
+grant execute on dbms_cloud to credit;
+alter user credit quota unlimited on data;
+</copy>
+```
+
+- asdf
+
+  ![](images/1/001.png " ")
+
