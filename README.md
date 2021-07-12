@@ -31,7 +31,7 @@ This documents an alternative approach that only requires the use of SQL (which 
 - Create a new schema that will own objects (userid demo in this case) and grant the necessary privileges:
 ```
 <copy>
-create user demo identfied by <password>;
+create user demo identified by <password>;
 grant dwrole, oml_developer, create table, create view to demo;
 grant read, write on directory data_pump_dir to demo;
 grant execute on dbms_cloud to demo;
@@ -79,6 +79,17 @@ create table sales as select * from sh.sales;
   ![](images/008.png " ")
 
   ![](images/009.png " ")
+
+
+- Confirm the credential can read files in object storage.  Enter the following:
+```
+<copy>
+SELECT * FROM DBMS_CLOUD.LIST_OBJECTS('API_TOKEN', '<object storage bucket uri>')
+</copy>
+```
+- You should see the file you uploaded
+
+  ![](images/011.png " ")
 
 - Create a new external table that reads data from this file.
 ```
