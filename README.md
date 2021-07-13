@@ -5,7 +5,7 @@ July, 2021
 
 This documents a case study from work with a customer who had the following requirements (not strictly limited to dbms_cloud features):
 - Automated load that processes data from daily and weekl csv files in Object Storage.
-- Deletes the files once they are loaded.
+- Deletes the files once they are loaded (or optionally move to a new 'processed' bucket).
 - Log load processes.
 - Audit updates to data with information about what was changed and when.
 - Provide a dashboard that shows various daily, weekly and quarterly metrics current and prior measures, with logic that handles missing data points.
@@ -72,7 +72,7 @@ create table sales as select * from sh.sales;
 
   ![](images/006.png " ")
 
-- Copy the file URL from the uploaded file.
+- Copy the file URL from the uploaded file by clicking on the far left dots.  Important - note that you will in later sections be copying the file path URL up to the *.../o/*  into code blocks (path to the file itself) so keep it handy in a note pad (replacing this string <object storage bucket uri>).
 
   ![](images/007.png " ")
 
@@ -87,25 +87,25 @@ create table sales as select * from sh.sales;
 SELECT * FROM DBMS_CLOUD.LIST_OBJECTS('API_TOKEN', '<object storage bucket uri>')
 </copy>
 ```
-- You should see the file you uploaded
+- You should see the file you uploaded.  You can now see that you can query an object storage bucket just like any other database table.
 
   ![](images/011.png " ")
 
-- Create a new external table that reads data from this file.
+- Create a new external table that reads data from this file.  Substitute the full file uri path in this case.
 ```
 <copy>
 BEGIN
  DBMS_CLOUD.CREATE_EXTERNAL_TABLE(
  table_name =>'new_sales_ext',
  credential_name =>'api_token',
- file_uri_list =>'<file URI>',
+ file_uri_list =>'<object storage file URI>',
  format => json_object('delimiter' value ',', 'removequotes' value 'true','ignoremissingcolumns' value 'true','blankasnull' value 'true','skipheaders' value '1'),
  column_list => 'prod_id number, cust_id number, time_id date, channel_id number, promo_id number, quantity_sold number, amount_sold number, last_update_date date');
 END;
 </copy>
 ```
 
-- Click on the *new_sales_ext* table and view data to confirm the table was created properly.  *Note: the file in object storage does NOT need to exist to create the external table.  It just needs to exist when you query the table.*
+- Click on the *new\_sales\_ext* table and view data to confirm the table was created properly.  *Note: the file in object storage does NOT need to exist to create the external table.  It just needs to exist when you query the table.*
 
   ![](images/010.png " ")
 
@@ -132,7 +132,7 @@ load_date date);
 </copy>
 ```
 
-## **STEP 5:** Create database triggers to log changes to the sales table.
+## **STEP 5:** Create database triggers to log changes to the sales table.  The first trigger captures before and after images of the data in an audit table.  The second trigger captures change date/time stamp.  This is so you don't need to do this in your application logic.  The updates are done regardless what way you update the table (as it should be!).
 ```
 <copy>
 CREATE OR REPLACE TRIGGER sales_trg
@@ -182,7 +182,7 @@ END;
 
 ## **STEP 6:** Create a stored procedure *load_sales*.
 
-- This procedure loops through all the files in the daily_input_files bucket and for each file re-creates the external table and then loads (and logs) the data.  *Note you will substitute your URI in the file_uri_list line below, but remove the file name part at the end since we'll allow ANY table in the bucket to get loaded and will rebuild the external table based on the preceding query.*.  Note it does not matter what the file names are (the process will do all the files in the bucket) and afer processing it deletes them.
+- This procedure loops through all the files in the *daily\_input\_files* bucket and for each file re-creates the external table and then loads (and logs) the data.  *Note you will substitute your URI in the file\_uri\_list line below, but remove the file name part at the end since we'll allow ANY table in the bucket to get loaded and will rebuild the external table based on the preceding query.*.  Note it does not matter what the file names are (the process will do all the files in the bucket) and afer processing it deletes them.  Since we have set versioning on the bucket the deletions can be recovered including prior versions of files with the same name.  Also note that if you wish to move the files after processing to a different bucket see a code block at the end of this document that shows how to do this.
 ```
 <copy>
 create or replace procedure load_sales as
@@ -342,3 +342,33 @@ END;
 ```
 
 - Note [the following](https://stackoverflow.com/questions/26602572/oracle-dbms-scheduler-repeat-interval) can be used to confirm the proper setup of your schedule.
+
+## How to move files between buckets (eg:archive to a different folder rather than delete the files).  Note you will need the object storage bucket uri and object storage file uri to replace in the code blocks below.
+```
+<copy>
+-----------------------------------------------------------
+-- move files from one bucket to another using dbms_cloud
+-----------------------------------------------------------
+
+-- list objects in daily_input_files bucket (source bucket)
+SELECT object_name FROM DBMS_CLOUD.LIST_OBJECTS('API_TOKEN', '<object storage bucket URI>')
+
+-- copy object to data_pump_dir oracle directory
+exec dbms_cloud.get_object('API_TOKEN','<object storage file URI>','data_pump_dir');
+
+-- review files in data_pump_dir
+SELECT * FROM DBMS_CLOUD.LIST_FILES('DATA_PUMP_DIR');
+
+-- copy file from data_pump_dir to a different bucket (target bucket - different URI).
+exec DBMS_CLOUD.PUT_OBJECT ('API_TOKEN','<object storage file URI>','data_pump_dir','new_sales.csv');
+
+-- list objects in new target bucket
+SELECT object_name FROM DBMS_CLOUD.LIST_OBJECTS('API_TOKEN', '<object storage bucket URI>')
+
+-- delete file in data_pump_dir
+exec DBMS_CLOUD.DELETE_FILE ('data_pump_dir','new_sales.csv');
+
+-- confirm file was deleted
+SELECT * FROM DBMS_CLOUD.LIST_FILES('DATA_PUMP_DIR');
+</copy>
+```
