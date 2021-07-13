@@ -138,9 +138,9 @@ load_date date);
 
 - test
 
-## **STEP 5:** Create database triggers to log changes to the sales table.  The first trigger captures before and after images of the data in an audit table.  The second trigger captures change date/time stamp.  This is so you don't need to do this in your application logic.  The updates are done regardless what way you update the table (as it should be!).
+## **STEP 5:** Create database triggers to log changes to the sales table.  
 
-- Compile this in your schema.
+- The first trigger captures before and after images of the data in an audit table.  The second trigger captures change date/time stamp.  This is so you don't need to do this in your application logic.  The updates are done regardless what way you update the table (as it should be!).  Compile this in your schema.
 ```
 <copy>
 CREATE OR REPLACE TRIGGER sales_trg
