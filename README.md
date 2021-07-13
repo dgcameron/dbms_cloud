@@ -72,7 +72,7 @@ create table sales as select * from sh.sales;
 
   ![](images/006.png " ")
 
-- Copy the file URL from the uploaded file by clicking on the far left dots.  Important - note that you will in later sections be copying the file path URL up to the *.../o/*  into code blocks (path to the file itself) so keep it handy in a note pad (replacing this string <object storage bucket uri>).
+- Copy the file URL from the uploaded file by clicking on the far left dots.  *Important - note that you will in later sections be copying either the file file path URL replacing tag <object storage file URI> OR just the path up to the *.../o/* replacing tag <object storage bucket URI> into code blocks so keep these two handy in a note pad.
 
   ![](images/007.png " ")
 
@@ -109,7 +109,7 @@ END;
 
   ![](images/010.png " ")
 
-## **STEP 4:** Create other objected used in this case study.  Run the following in the demo schema:
+## **STEP 4:** Create other tables used in this case study.  Run the following in the demo schema:
 ```
 <copy>
 create table sales_update_log (
@@ -182,7 +182,7 @@ END;
 
 ## **STEP 6:** Create a stored procedure *load_sales*.
 
-- This procedure loops through all the files in the *daily\_input\_files* bucket and for each file re-creates the external table and then loads (and logs) the data.  *Note you will substitute your URI in the file\_uri\_list line below, but remove the file name part at the end since we'll allow ANY table in the bucket to get loaded and will rebuild the external table based on the preceding query.*.  Note it does not matter what the file names are (the process will do all the files in the bucket) and afer processing it deletes them.  Since we have set versioning on the bucket the deletions can be recovered including prior versions of files with the same name.  Also note that if you wish to move the files after processing to a different bucket see a code block at the end of this document that shows how to do this.
+- This procedure loops through all the files in the *daily\_input\_files* bucket and for each file re-creates the external table and then loads (and logs) the data.  Be sure to replace the URI tags.  Note it does not matter what the file names are (the process will do all the files in the bucket) and afer processing it deletes them.  Since we have set versioning on the bucket the deletions can be recovered including prior versions of files with the same name.  Also note that if you wish to move the files after processing to a different bucket see a code block at the end of this document that shows how to do this.
 ```
 <copy>
 create or replace procedure load_sales as
@@ -241,7 +241,7 @@ end load_sales;
 
 ## **STEP 7:** Create a stored procedure *update_sales*.
 
-- This procedure also loops through all the files in the daily_input_files bucket and for each file re-creates the external table and then *updates* (and logs) the data.  *Note you will substitute your URI in the file_uri_list line below, but remove the file name part at the end since we'll allow ANY table in the bucket to get loaded and will rebuild the external table based on the preceding query.*.  Note this code has used bulk load pl/sql processing to reduce pl/sql - to sql context switching, providing batch processing versus row by row processing.
+- This procedure also loops through all the files in the daily_input_files bucket and for each file re-creates the external table and then *updates* (and logs) the data.  Note this code has used bulk load pl/sql processing to reduce pl/sql - to sql context switching, providing batch processing versus row by row processing.
 ```
 <copy>
 create or replace procedure update_sales as
@@ -343,7 +343,7 @@ END;
 
 - Note [the following](https://stackoverflow.com/questions/26602572/oracle-dbms-scheduler-repeat-interval) can be used to confirm the proper setup of your schedule.
 
-## How to move files between buckets (eg:archive to a different folder rather than delete the files).  Note you will need the object storage bucket uri and object storage file uri to replace in the code blocks below.
+## How to move files between buckets (eg: archive to a different folder rather than delete the files).  Note you will need the object storage bucket uri and object storage file uri to replace in the code blocks below.
 ```
 <copy>
 -----------------------------------------------------------
