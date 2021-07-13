@@ -3,7 +3,7 @@
 Derrick Cameron
 July, 2021
 
-### **Introduction** 
+## **Introduction** 
 
 This documents a case study from work with a customer who had the following requirements (not strictly limited to dbms_cloud features):
 - Automated load that processes data from daily and weekly csv files in Object Storage.
