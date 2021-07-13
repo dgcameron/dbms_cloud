@@ -221,7 +221,7 @@ select count(*) into v_row_count from sales_ext;
 -- for each file load daily data
 ---------------------------------------------------
 
-insert into sales select a.*, sysdate from sales_ext a;
+insert into sales select a.* from sales_ext a;
 commit;
 
 -- delete existing external table
