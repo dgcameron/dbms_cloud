@@ -200,7 +200,7 @@ loop
 
 -- drop external table
 begin
-execute immediate 'drop table sales_ext';
+execute immediate 'drop table new_sales_ext';
 exception when others then null;
 end;
 
@@ -215,13 +215,13 @@ begin
 exception when others then null;
 end;
 
-select count(*) into v_row_count from sales_ext;
+select count(*) into v_row_count from new_sales_ext;
 
 ---------------------------------------------------
 -- for each file load daily data
 ---------------------------------------------------
 
-insert into sales select a.* from sales_ext a;
+insert into sales select a.* from new_sales_ext a;
 commit;
 
 -- delete existing external table
@@ -247,7 +247,7 @@ end load_sales;
 create or replace procedure update_sales as
 
 v_row_count number;
-type sales_t is table of sales_ext%rowtype index by pls_integer;
+type sales_t is table of new_sales_ext%rowtype index by pls_integer;
 l_sales sales_t;
 
 begin
@@ -261,14 +261,14 @@ loop
 
 -- drop external table
 begin
-execute immediate 'drop table sales_ext';
+execute immediate 'drop table new_sales_ext';
 exception when others then null;
 end;
 
 -- re-create external table
 begin
  DBMS_CLOUD.CREATE_EXTERNAL_TABLE(
- table_name =>'sales_ext',
+ table_name =>'new_sales_ext',
  credential_name =>'api_token',
  file_uri_list =>'<object storage bucket uri>'||i.object_name,
  format => json_object('delimiter' value ',', 'removequotes' value 'true','ignoremissingcolumns' value 'true','blankasnull' value 'true','skipheaders' value '1'),
@@ -276,13 +276,13 @@ begin
 exception when others then null;
 end;
 
-select count(*) into v_row_count from sales_ext;
+select count(*) into v_row_count from new_sales_ext;
 
 ---------------------------------------------------
 -- for each file update daily data
 ---------------------------------------------------
 
-select * bulk collect into l_sales from sales_ext;
+select * bulk collect into l_sales from new_sales_ext;
 
 forall i2 in 1 .. l_sales.last
 
