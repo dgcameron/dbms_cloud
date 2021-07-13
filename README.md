@@ -354,7 +354,9 @@ END;
 
 - Note [the following](https://stackoverflow.com/questions/26602572/oracle-dbms-scheduler-repeat-interval) can be used to confirm the proper setup of your schedule.
 
-## How to move files between buckets (eg: archive to a different folder rather than delete the files).  Note you will need the object storage bucket uri and object storage file uri to replace in the code blocks below.
+## How to move files between buckets (eg: archive to a different folder rather than delete the files).  
+
+- Note you will need the object storage bucket uri and object storage file uri to replace in the code blocks below.
 ```
 <copy>
 -----------------------------------------------------------
