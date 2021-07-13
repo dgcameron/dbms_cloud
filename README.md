@@ -3,6 +3,8 @@
 Derrick Cameron
 July, 2021
 
+## **Introduction** 
+
 This documents a case study from work with a customer who had the following requirements (not strictly limited to dbms_cloud features):
 - Automated load that processes data from daily and weekly csv files in Object Storage.
 - Deletes the files once they are loaded (or optionally move to a new 'processed' bucket).
@@ -109,7 +111,9 @@ END;
 
   ![](images/010.png " ")
 
-## **STEP 4:** Create other tables used in this case study.  Run the following in the demo schema:
+## **STEP 4:** Create other tables used in this case study.  Run the following in the demo schema.
+
+- Run this in sqldevelper.
 ```
 <copy>
 create table sales_update_log (
@@ -133,6 +137,8 @@ load_date date);
 ```
 
 ## **STEP 5:** Create database triggers to log changes to the sales table.  The first trigger captures before and after images of the data in an audit table.  The second trigger captures change date/time stamp.  This is so you don't need to do this in your application logic.  The updates are done regardless what way you update the table (as it should be!).
+
+- Compile this in your schema.
 ```
 <copy>
 CREATE OR REPLACE TRIGGER sales_trg
