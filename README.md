@@ -372,3 +372,29 @@ exec DBMS_CLOUD.DELETE_FILE ('data_pump_dir','new_sales.csv');
 SELECT * FROM DBMS_CLOUD.LIST_FILES('DATA_PUMP_DIR');
 </copy>
 ```
+
+## Analytics on external tables
+
+- Since external tables are just like normal tables to SQL, you can take advantage of the vast high performance analytic functions in the oracle data whithout necessarily needing to load the data.  The query reads from the 940K row external table, joins it with all the other SH tables, and performs analytic functions simliar to the requirements in the customer case study.
+
+-- view
+select n.channel_desc
+, c.cust_first_name||' '||c.cust_last_name customer_name
+, p.prod_name
+, o.promo_name
+, t.time_id date_sold
+, s.quantity_sold
+, s.amount_sold
+, sum(s.amount_sold) over (partition by n.channel_desc, c.cust_first_name||' '||c.cust_last_name, p.prod_name, o.promo_name order by t.time_id) daily_sum_amount_sold
+, avg(s.amount_sold) over (partition by n.channel_desc, c.cust_first_name||' '||c.cust_last_name, p.prod_name, o.promo_name order by t.time_id) daily_avg_amount_sold
+from sh.channels n
+, sh.customers c
+, sh.products p
+, sh.promotions o
+, sh.times t
+, sales_ext s
+where n.channel_id = s.channel_id
+and c.cust_id = s.cust_id
+and p.prod_id = s.prod_id
+and o.promo_id = s.promo_id
+and t.time_id = s.time_id
