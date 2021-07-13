@@ -28,7 +28,9 @@ This documents an alternative approach that only requires the use of SQL (which 
 
   ![](images/003.png " ")
 
-## **STEP 2:** Log into the *Admin* database user and create a database user demo with the required permissions, create a credential, and copy the sales table from sh.  You can use either SQL Developer off the cloud console or sql developer client:
+## **STEP 2:** Log into the *Admin* database user and create database objects.
+
+- Create a database user demo with the required permissions, create a credential, and copy the sales table from sh.  You can use either SQL Developer off the cloud console or sql developer client.
 
 - Create a new schema that will own objects (userid demo in this case) and grant the necessary privileges:
 ```
