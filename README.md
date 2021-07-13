@@ -16,7 +16,8 @@ There are various ways to do this, and the availability of cloud services such a
 
 This documents an alternative approach that only requires the use of SQL (which is needed in any case) and no other platform.  It is scalable and can process millions of records in seconds even using a minimal 1-ocpu ADB shape, and also offers the full power of the SQL language to handle the processing of object storage files as though they were native database files.  To illustrate we'll use data from the sh schema that is available in every Oracle Database so others can replicate these steps in their own environment.  We'll copy the *sales* table from the *sh* schema to a new *demo* schema so we can update it, but will leave the other sh tables as is and will be querying them.
 
-## **STEP 1:** Create an Auth Token so ADB Can read files in Object Storage:
+
+## **Step 1:** Create an Auth Token so ADB Can read files in Object Storage:
 
 - Navigate to your users
 
@@ -28,7 +29,7 @@ This documents an alternative approach that only requires the use of SQL (which 
 
   ![](images/003.png " ")
 
-## **STEP 2:** Log into the *Admin* database user and create database objects.
+## **Step 2:** Log into the *Admin* database user and create database objects.
 
 - Create a database user demo with the required permissions, create a credential, and copy the sales table from sh.  You can use either SQL Developer off the cloud console or sql developer client.
 
@@ -64,7 +65,7 @@ create table sales as select * from sh.sales;
 </copy>
 ```
 
-## **STEP 3:** Create a new object storage bucket, upload new_sales.csv to object storage, and create an external table on that file.
+## **Step 3:** Create a new object storage bucket, upload new_sales.csv to object storage, and create an external table on that file.
 
 - Create a new bucket called *daily_input_files*.
 
@@ -113,7 +114,7 @@ END;
 
   ![](images/010.png " ")
 
-## **STEP 4:** Create other tables used in this case study.  Run the following in the demo schema.
+## **Step 4:** Create other tables used in this case study.  Run the following in the demo schema.
 
 - Run this in sqldevelper.
 ```
@@ -140,7 +141,7 @@ load_date date);
 
 - test
 
-## **STEP 5:** Create database triggers to log changes to the sales table.  
+## **Step 5:** Create database triggers to log changes to the sales table.  
 
 - The first trigger captures before and after images of the data in an audit table.  The second trigger captures change date/time stamp.  This is so you don't need to do this in your application logic.  The updates are done regardless what way you update the table (as it should be!).  Compile this in your schema.
 ```
@@ -190,7 +191,7 @@ END;
 </copy>
 ```
 
-## **STEP 6:** Create a stored procedure *load_sales*.
+## **Step 6:** Create a stored procedure *load_sales*.
 
 - This procedure loops through all the files in the *daily\_input\_files* bucket and for each file re-creates the external table and then loads (and logs) the data.  Be sure to replace the URI tags.  Note it does not matter what the file names are (the process will do all the files in the bucket) and afer processing it deletes them.  Since we have set versioning on the bucket the deletions can be recovered including prior versions of files with the same name.  Also note that if you wish to move the files after processing to a different bucket see a code block at the end of this document that shows how to do this.
 ```
@@ -249,7 +250,7 @@ end load_sales;
 </copy>
 ```
 
-## **STEP 7:** Create a stored procedure *update_sales*.
+## **Step 7:** Create a stored procedure *update_sales*.
 
 - This procedure also loops through all the files in the daily_input_files bucket and for each file re-creates the external table and then *updates* (and logs) the data.  Note this code has used bulk load pl/sql processing to reduce pl/sql - to sql context switching, providing batch processing versus row by row processing.
 ```
@@ -322,7 +323,7 @@ end update_sales;
 </copy>
 ```
 
-## **STEP 8:** Create a scheduled job that will periodcally check
+## **Step 8:** Create a scheduled job that will periodcally check
 
 - Create a schedule.  *Note this sample code sets up a job that will execute every five minutes.  This is only to test.  You need to change this to suit your desired schedule.*  This is just a sample.  You would need a separate one (or combine in a package) for the update job.
 ```
