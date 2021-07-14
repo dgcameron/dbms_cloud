@@ -247,7 +247,7 @@ end load_sales;
 </copy>
 ```
 
-## **Step 7:** Create a stored procedure *update_sales*.
+## **Step 7:** Create a stored procedure `update_sales`.
 
 - This procedure also loops through all the files in the daily_input_files bucket and for each file re-creates the external table and then updates (and logs) the data.  Note this code has used bulk load pl/sql processing to reduce pl/sql - to sql context switching, providing batch processing versus row by row processing.
 ```
