@@ -61,7 +61,7 @@ END;
 ```
 <copy>
 create table sales as select * from sh.sales;
-alter table sales add(last_udpate_date date);
+alter table sales add(last_update_date date);
 </copy>
 ```
 
